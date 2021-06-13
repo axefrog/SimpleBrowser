@@ -10,6 +10,7 @@ namespace SimpleBrowser
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using SimpleBrowser.Properties;
 
     public class HtmlLogFormatter
@@ -23,7 +24,7 @@ namespace SimpleBrowser
             public int RequestsCount { get; set; }
         }
 
-        public string Render(List<LogItem> logs, string title)
+        public string Render(List<LogItem> logs, string title, IViewRenderService renderservice)
         {
             RazorModel model = new RazorModel
             {
@@ -34,11 +35,19 @@ namespace SimpleBrowser
                 RequestsCount = logs.Count(l => l is HttpRequestLog)
             };
 
-            var engine = new RazorLight.RazorLightEngineBuilder()
-                .UseMemoryCachingProvider()
-                .Build();
+            //var engine = new RazorLight.RazorLightEngineBuilder()
+            //    .UseMemoryCachingProvider()
+            //    .Build();
 
-            return engine.CompileRenderAsync("HtmlLog", Resources.HtmlLogTemplate, model).Result;
+            return renderservice.RenderToString(Resources.HtmlLogTemplate, model.Title, model);
+
         }
+
+        public interface IViewRenderService
+        {
+           
+            string RenderToString<TModel>(string template, string title, TModel model);
+        }
+
     }
 }
